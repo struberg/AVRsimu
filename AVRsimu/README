@@ -1,0 +1,7 @@
+=== AVRsimu ===
+
+AVRsimu is simulator for Atmel AVR microcontrollers. 
+It has a command line interface, graphical interfaces may follow. 
+AVRsimu tries to stay small and portable.
+
+For more Information, see http://sourceforge.net/projects/avrsimu/
