@@ -1,3 +1,6 @@
 
-sim: sim.o avr.o instructions.o
+avrsimu: avrsimu.o avr.o instructions.o
 
+clean:
+	rm *.o
+	rm avrsimu

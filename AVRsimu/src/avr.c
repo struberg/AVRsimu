@@ -117,7 +117,8 @@ int load_ihex(struct avrmcu * avr, const char * filename)
 		}
 
 		switch (mode){
-			case 0:	/*printf("address: %x  data: %s\n",address, data);*/
+			case 0:	
+//				printf("address: %x  data: %s length: %d\n",address, data,length);
 				/*get the csum*/
 				sscanf(&data[2*length],"%2hx", &csum);
 				/*cut the csum off*/
@@ -131,8 +132,8 @@ int load_ihex(struct avrmcu * avr, const char * filename)
 					sscanf(&data[2*2*(i-address/2)],"%2hx%2hx",
 							&lowbyte,&highbyte);
 					word=lowbyte|(highbyte<<8);
-					/* printf("addr: %04x  h: %x, l:%x -> word:%x\n"
-					      ,i, highbyte, lowbyte,word); */
+//					printf("addr: %04x  h: %x, l:%x -> word:%x\n"
+//					      ,i, highbyte, lowbyte,word);
 					avr->flash[i]=word;
 				}
 				avr->lastinstruction = i > avr->lastinstruction ? i : avr->lastinstruction;
@@ -144,7 +145,7 @@ int load_ihex(struct avrmcu * avr, const char * filename)
 				//printf("I dunno what to do with this -> ignored\n");
 				break;
 			default:
-				//printf(This should never happen!!!\n");
+				//printf("This should never happen!!!\n");
 				break;
 		}
 	}
