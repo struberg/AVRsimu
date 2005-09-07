@@ -56,6 +56,9 @@ struct avrmcu* create_avrmcu(void)
 	static struct avrmcu avr; //XXX:is static correct?
 	avr.registers 	= avr.sram;
 	avr.ports	= avr.sram+32;
+	avr.ramend          = RAMEND;
+	avr.flashend        = FLASHEND;
+	avr.lastinstruction = 0;
 	clear_flash(&avr);
 
 	return &avr;
@@ -132,7 +135,7 @@ int load_ihex(struct avrmcu * avr, const char * filename)
 					      ,i, highbyte, lowbyte,word); */
 					avr->flash[i]=word;
 				}
-
+				avr->lastinstruction = i > avr->lastinstruction ? i : avr->lastinstruction;
 				break;
 			case 1:
 				//printf("IHEX end detected?\n");

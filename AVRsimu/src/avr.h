@@ -59,6 +59,9 @@ struct avrmcu{
 	char name[10];
 	int PC;
 	long int cycles;
+	unsigned int ramend;
+	unsigned int flashend;
+	unsigned int lastinstruction;
 	/*struct sreg * sreg; this isn't kosha!*/
 	unsigned char*  registers;
 	unsigned char*  ports;
