@@ -112,12 +112,17 @@ void print_registers( struct avrmcu* avr ) {
 	for (i=0;i<=31;i++){
 		printf( "R%02d =%02X(%03d)%c", i, avr->sram[i], avr->sram[i], (i+1)%8?' ':'\n' );
 	}
+	unsigned short int x = (avr->registers[27]<<8) | avr->registers[26];
+	unsigned short int y = (avr->registers[29]<<8) | avr->registers[28];
+	unsigned short int z = (avr->registers[31]<<8) | avr->registers[30];
+	printf( "X: %04X (%d)   Y: %04X (%d)   Z: %04X (%d)\n"
+	      ,  x, x, y, y, z, z );
 }
 
 void print_flash(struct avrmcu * avr)
 {
 	unsigned int i;
-	for (i=0;i<=FLASHEND;i++){
+	for (i=0;i<=avr->lastinstruction;i++){
 		if (i%8==0){
 			printf("\n %06x: ",i);
 		}
