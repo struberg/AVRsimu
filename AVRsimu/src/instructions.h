@@ -91,15 +91,13 @@ enum _instructions{
 	/* FMUL,	later
 	 * FMULS,	later
 	 * FMULSU,	later
-	 * ICALL,	later
-	 * IJMP,	later
-	 */
+	 * ICALL,	later */
+	IJMP,
 	INC,
 	/* JMP,		later
-	 * LD,		later
-	 * LDD,		later
-	 * LDS,		later
-	 */
+	 * LD,		later */
+	   LDD,
+	/* LDS,		later */
 	LPM,		//LPM with no operands
 	LPMZ,		//LPM with Rd and Z
 	/* LSL,		see ADD Rd, Rd */
