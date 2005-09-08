@@ -144,10 +144,10 @@ void set_sram(struct avrmcu * avr) {
 		printf( "\nERROR: wrong SRAM address %d!\n\n", addr );
 		return;
 	}
-	printf( "Old Value of SRAM[0x%04X]: %04X - insert new value in hex: ", addr, avr->sram[addr] );
+	printf( "Old Value of SRAM[0x%04X]: 0x%04X - insert new value in hex: ", addr, avr->sram[addr] );
 	scanf( "%x", &value );
 	if( value == -1 || value > 0xff) {
-		printf( "\nERROR: wrong value %X for SRAM[0x%04X]!\n\n", value, addr );
+		printf( "\nERROR: wrong value %d for SRAM[0x%04X]!\n\n", value, addr );
 		return;
 	}		
 	avr->sram[addr] = value;
