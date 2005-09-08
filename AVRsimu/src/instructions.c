@@ -436,12 +436,13 @@ void instr_CP(struct avrmcu *avr, unsigned short int opcode, unsigned short int 
 			r = get_reg2(opcode);
 	unsigned char	Rd = avr->registers[d],
 			Rr = avr->registers[r],
-			R  = Rd -Rr,
+			R  = Rd - Rr,
 			sreg = avr->ports[SREG];
 
 	sreg = get_sub_sreg(sreg,Rd,Rr,R);
 	
-	printf("CP Sreg = 0x%02x\n",sreg);
+	printf("CP R%d (0x%04x) ==  R%d (0x%04x) Sreg = 0x%02x\n"
+	      , d, avr->registers[d], r, avr->registers[r], sreg);
 
 	avr->ports[SREG] = sreg;
 
@@ -582,7 +583,7 @@ void instr_ADD(struct avrmcu *avr, unsigned short int opcode, unsigned short int
 //ADIW
 void instr_ADIW(struct avrmcu *avr, unsigned short int opcode, unsigned short int size)
 {
-	unsigned char 	d = 24+((opcode & 0x0030)>>4),
+	unsigned char 	d = 24+((opcode & 0x0030)>>3),   // >>3, da eigentlich >>4 *2 ;)
 			K = (opcode & 0x000F) | ((opcode & 0x00C0)>>2),
 			sreg = avr->ports[SREG],
 			N,V;
@@ -830,13 +831,13 @@ void instr_BRBS(struct avrmcu *avr, unsigned short int opcode, unsigned short in
 	signed char 	k = get_signed_7bit_value(opcode);
 	unsigned char	s = opcode & 0x07;
 	
-	//printf("sreg=0x%02x, s=%d, k=%d\n",avr->ports[SREG],s,k);
-	if ((avr->ports[SREG] & 0x01<<s)==1){
-		printf("BRBS: Branch to PC=%d\n",avr->PC+k+1);
+	//X printf("sreg=0x%02x, s=%d, k=%d\n",avr->ports[SREG],s,k);
+	if ((avr->ports[SREG] & (0x01<<s))!=0){
+		printf("BRBS SREG bit%d: Branch to PC=%d\n", s, avr->PC+k+1);
 		avr->PC = avr->PC + k + 1;
 		avr->cycles+=2;
 	}else{
-		printf("BRBS: no branch\n");
+		printf("BRBS SREG bit%d, no branch\n", s);
 		avr->PC++;
 		avr->cycles++;
 
