@@ -52,7 +52,8 @@ void reset_avr(struct avrmcu *);
 void clear_flash(struct avrmcu *);
 
 
-void step(struct avrmcu *);
+void step(struct avrmcu* avr );
+void cont( struct avrmcu* avr );
 
 
 struct avrmcu{
@@ -67,6 +68,7 @@ struct avrmcu{
 	unsigned char*  ports;
 	unsigned char sram[RAMEND+1];
 	unsigned short int flash[FLASHEND+1]; //flash is organized in words
+	unsigned char breakpoint[FLASHEND+1];  // 1 means a breakpoint is set
 };
 
 

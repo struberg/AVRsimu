@@ -29,26 +29,40 @@ void step(struct avrmcu * avr)
 	int i;
 
 	opcode=avr->flash[avr->PC]; //FIXME: what if file has not been loaded
-	printf("executed: PC=%X(%d)   opcode: 0x%x\n",avr->PC,avr->PC, opcode);
-	
+	printf("PC=%04X opc %04x ",avr->PC, opcode);
 	/*look up the opcode*/
 	for (i=0;i<INSTR_MAX;i++){
 		//printf("masked: 0x%04x\n",opcode & instructions[i].mask);
 		//outmask all data bits and compare with code
 		if ((opcode & instructions[i].mask) == instructions[i].code){
-			printf("instructions[%d]: ",i);
+			printf("instr[%02d]:   ",i);
 			//execute instructions (includes parsing parameters from opcode)
 			instructions[i].function_ptr(avr, opcode, instructions[i].size);
 			break; //leave for
 		}
 	}
-	if (i==INSTR_MAX) //we haven't found the instruction
+	if (i==INSTR_MAX) { //we haven't found the instruction
 			printf("Instruction not yet implemented\n");
-
-
-
+	}
 }
 
+/**
+ * Continue programm execution till next breakpoint
+ */
+void cont( struct avrmcu* avr ) {
+	step( avr ); // the first step have to be done without breakpoint checking
+	while( avr->breakpoint[avr->PC] != 1 ) {
+		step( avr );
+	}
+	printf( "stopped at breakpoint 0x%04x\n", avr->PC ); 
+}
+
+/**
+ * Toggle breakpoint for the given line
+ */
+toggleBreakpoint( struct avrmcu* avr, unsigned short int line ) {
+	avr->breakpoint[line] = avr->breakpoint[line] == 0 ? 1 : 0;
+}
 
 /* init the structure avrmcu */
 struct avrmcu* create_avrmcu(void)
@@ -63,6 +77,7 @@ struct avrmcu* create_avrmcu(void)
 
 	return &avr;
 }
+
 
 /* Resets the avr (as if a hardware reset was done) */
 void reset_avr(struct avrmcu * avr)
@@ -85,9 +100,12 @@ void reset_avr(struct avrmcu * avr)
 void clear_flash(struct avrmcu * avr)
 {
 	int i;
-	for (i=0;i<=FLASHEND;i++)
+	for (i=0;i<=FLASHEND;i++) {
 		avr->flash[i]=0xFFFF; //flash contains words
+		avr->breakpoint[i] = 0; // no breakpoint at this line
+	}
 }
+
 
 /* Loads <filename> into the AVR's flash
  *

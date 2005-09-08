@@ -26,8 +26,13 @@
 int load_ihex (struct avrmcu * avr, const char * filename);
 void printHelp();
 void print_registers( struct avrmcu* avr );
+void set_register( struct avrmcu* avr );
 void print_sram(struct avrmcu * avr);
+void set_sram(struct avrmcu * avr);
 void print_flash(struct avrmcu * avr);
+void set_flash(struct avrmcu * avr);
+void print_breakpoints( struct avrmcu * avr);
+void set_breakpoint( struct avrmcu * avr);
 
 int run(struct avrmcu * avr);
 
@@ -56,7 +61,7 @@ int main(int argc, const char* argv[])
 	//print_sram(&avr);
 	
 	while( bCont ) {
-		cCmd = getchar();
+		cCmd = getc( stdin );
 		switch( cCmd) {
 			case '?': 
 				printHelp();
@@ -64,14 +69,32 @@ int main(int argc, const char* argv[])
 			case 's':
 				print_sram(avr);
 				break;
+			case 'S':
+				set_sram(avr);
+				break;
 			case 'r':
 				print_registers(avr);
+				break;
+			case 'R':
+				set_register(avr);
 				break;
 			case 'f':
 				print_flash(avr);
 				break;
+			case 'F':
+				set_flash(avr);
+				break;
 			case 'n':
 				step(avr);
+				break;
+			case 'c':
+				cont(avr);
+				break;
+			case 'b':
+				print_breakpoints(avr);
+				break;
+			case 'B':
+				set_breakpoint(avr);
 				break;
 			case 'x':
 				bCont=0;
@@ -85,11 +108,17 @@ int main(int argc, const char* argv[])
 
 void printHelp() {
 	printf( "?   help\n");
-	printf( "n   next step\n");
-	printf( "s   show SRAM\n");
+	printf( "s   show Sram\n");
+	printf( "S   set value in sram Sram\n");
 	printf( "r   show Registers\n");
+	printf( "R   set Registers value\n");
 	printf( "f   show Flash\n");
-	printf( "x   exit\n");
+	printf( "F   set value in Flash\n");
+	printf( "n   Next step\n");
+	printf( "c   Continue execution till next breakpoint\n");
+	printf( "b   show Breakpoints\n");
+	printf( "B   toggle Breakpoint\n");
+	printf( "x   eXit\n");
 }
 
 
@@ -106,6 +135,24 @@ void print_sram(struct avrmcu * avr)
 	printf("\n");
 }
 
+void set_sram(struct avrmcu * avr) {
+	long int addr = -1;
+	int value = -1;
+	printf( "Enter SRAM address to change in hex: " );
+	scanf( "%x", &addr );
+	if( addr == -1 || addr > avr->ramend ) {
+		printf( "\nERROR: wrong SRAM address %d!\n\n", addr );
+		return;
+	}
+	printf( "Old Value of SRAM[0x%04X]: %04X - insert new value in hex: ", addr, avr->sram[addr] );
+	scanf( "%x", &value );
+	if( value == -1 || value > 0xff) {
+		printf( "\nERROR: wrong value %X for SRAM[0x%04X]!\n\n", value, addr );
+		return;
+	}		
+	avr->sram[addr] = value;
+}
+
 
 void print_registers( struct avrmcu* avr ) {
 	unsigned int i;
@@ -117,6 +164,24 @@ void print_registers( struct avrmcu* avr ) {
 	unsigned short int z = (avr->registers[31]<<8) | avr->registers[30];
 	printf( "X: %04X (%d)   Y: %04X (%d)   Z: %04X (%d)\n"
 	      ,  x, x, y, y, z, z );
+}
+
+void set_register( struct avrmcu* avr ) {
+	int reg = -1;
+	int value = -1;
+	printf( "Enter Register to change: " );
+	scanf( "%i", &reg );
+	if( reg == -1 || reg > 31 ) {
+		printf( "\nERROR: wrong register number %d!\n\n", reg );
+		return;
+	}
+	printf( "Old Value of R%02d: %02X - insert new value in hex: ", reg, avr->registers[reg] );
+	scanf( "%x", &value );
+	if( value == -1 || value > 0xff) {
+		printf( "\nERROR: wrong value %X for Register %d!\n\n", value, reg );
+		return;
+	}		
+	avr->registers[reg] = value;
 }
 
 void print_flash(struct avrmcu * avr)
@@ -131,13 +196,51 @@ void print_flash(struct avrmcu * avr)
 	printf("\n");
 }
 
-int run(struct avrmcu * avr)
-{
- 	unsigned short int opcode;
-	int i;
-	
-	
-	while (avr->PC<=FLASHEND){	//the avr never stops?
-		step(avr);
+void set_flash(struct avrmcu * avr) {
+	long int addr = -1;
+	long int value = -1;
+	printf( "Enter Flash address to change in hex: " );
+	scanf( "%x", &addr );
+	if( addr == -1 || addr > avr->flashend ) {
+		printf( "\nERROR: wrong flash address %d!\n\n", addr );
+		return;
+	}
+	printf( "Old Value of FLASH[%04X]: %04X - insert new value in hex: ", addr, avr->flash[addr] );
+	scanf( "%x", &value );
+	if( value == -1 || value > 0xffff) {
+		printf( "\nERROR: wrong value %X for Flash!\n\n", value );
+		return;
 	}		
+	avr->flash[addr] = value;
 }
+
+/**
+ * Print all given breakpoints
+ */
+void print_breakpoints( struct avrmcu * avr) {
+	unsigned int i;
+	for(i=0;i<=avr->lastinstruction;i++){
+		if( avr->breakpoint[i] == 1 ){
+			printf("breakpoint at addr 0x%04x - instruction: 0x%04x\n", i, avr->flash[i] );
+		}
+	}
+	printf("\n");
+}
+	
+/**
+ * 
+ */
+void set_breakpoint( struct avrmcu * avr) {
+	int addr = -1;
+	printf( "enter breakpoint address in hex: " );
+	scanf( "%X", &addr );
+	if( addr != -1 ) {
+		if( addr > avr->lastinstruction ) {
+			printf( "\nERROR! given address behind last instruction!\n\n" );
+		} else {
+			printf( "toggle breakpoint at addr 0x%04X\n", addr );
+			toggleBreakpoint( avr, addr );
+		}
+	}
+}
+

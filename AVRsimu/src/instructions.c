@@ -1347,7 +1347,7 @@ void instr_ST_Z(struct avrmcu *avr, unsigned short int opcode, unsigned short in
 	addr = (avr->registers[31]<<8) + avr->registers[30];
 	avr->PC++;
 	if( addr > avr->ramend ) {
-		printf("ERROR: *Z out of available SRAM!");
+		printf("ERROR: *Z out of available SRAM!\n");
 		return;
 	}
 	avr->sram[ addr ] = avr->registers[ r ];
@@ -1363,7 +1363,7 @@ void instr_ST_ZP(struct avrmcu *avr, unsigned short int opcode, unsigned short i
 	addr = (avr->registers[31]<<8) + avr->registers[30];
 	avr->PC++;
 	if( addr > avr->ramend ) {
-		printf("ERROR: *Z out of available SRAM!");
+		printf("ERROR: *Z out of available SRAM!\n");
 		return;
 	}
 	avr->sram[ addr ] = avr->registers[ r ];
@@ -1391,7 +1391,7 @@ void instr_ST_MZ(struct avrmcu *avr, unsigned short int opcode, unsigned short i
 
 	avr->PC++;
 	if( addr > avr->ramend ) {
-		printf("ERROR: *Z out of available SRAM!");
+		printf("ERROR: *Z out of available SRAM!\n");
 		return;
 	}
 	avr->sram[ addr ] = avr->registers[ r ];
