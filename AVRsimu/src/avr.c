@@ -35,7 +35,7 @@ void step(struct avrmcu * avr)
 		//printf("masked: 0x%04x\n",opcode & instructions[i].mask);
 		//outmask all data bits and compare with code
 		if ((opcode & instructions[i].mask) == instructions[i].code){
-			printf("instr[%02d]:   ",i);
+			printf("cy[%06d] :  ", avr->cycles );
 			//execute instructions (includes parsing parameters from opcode)
 			instructions[i].function_ptr(avr, opcode, instructions[i].size);
 			break; //leave for
@@ -55,7 +55,7 @@ void cont( struct avrmcu* avr ) {
 	while( avr->breakpoint[avr->PC] != 1 ) {
 		step( avr );
 	}
-	printf( "stopped at breakpoint 0x%04x  in %d CPU-cycles\n", avr->PC, avr->cycles - cyclesStart ); 
+	printf( "stopped at breakpoint 0x%04x  after %d CPU-cycles\n", avr->PC, avr->cycles - cyclesStart ); 
 }
 
 /**
