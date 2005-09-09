@@ -50,11 +50,12 @@ void step(struct avrmcu * avr)
  * Continue programm execution till next breakpoint
  */
 void cont( struct avrmcu* avr ) {
+	unsigned long int cyclesStart = avr->cycles;
 	step( avr ); // the first step have to be done without breakpoint checking
 	while( avr->breakpoint[avr->PC] != 1 ) {
 		step( avr );
 	}
-	printf( "stopped at breakpoint 0x%04x\n", avr->PC ); 
+	printf( "stopped at breakpoint 0x%04x  in %d CPU-cycles\n", avr->PC, avr->cycles - cyclesStart ); 
 }
 
 /**

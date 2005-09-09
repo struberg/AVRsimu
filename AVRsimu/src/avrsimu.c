@@ -33,7 +33,6 @@ void print_flash(struct avrmcu * avr);
 void set_flash(struct avrmcu * avr);
 void print_breakpoints( struct avrmcu * avr);
 void set_breakpoint( struct avrmcu * avr);
-
 int run(struct avrmcu * avr);
 
 
@@ -162,8 +161,8 @@ void print_registers( struct avrmcu* avr ) {
 	unsigned short int x = (avr->registers[27]<<8) | avr->registers[26];
 	unsigned short int y = (avr->registers[29]<<8) | avr->registers[28];
 	unsigned short int z = (avr->registers[31]<<8) | avr->registers[30];
-	printf( "X: %04X (%d)   Y: %04X (%d)   Z: %04X (%d)\n"
-	      ,  x, x, y, y, z, z );
+	printf( "X: %04X (%d)   Y: %04X (%d)   Z: %04X (%d)  SREG: 0x%02X  SP:0x%04X\n"
+	      ,  x, x, y, y, z, z, avr->ports[SREG], avr->ports[SP] );
 }
 
 void set_register( struct avrmcu* avr ) {
@@ -228,7 +227,7 @@ void print_breakpoints( struct avrmcu * avr) {
 }
 	
 /**
- * 
+ * toggle breakpoint at the given line
  */
 void set_breakpoint( struct avrmcu * avr) {
 	int addr = -1;

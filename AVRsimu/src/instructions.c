@@ -123,11 +123,10 @@ unsigned short int get_offsetword(unsigned short int opcode)
 
 unsigned char set_bit(unsigned char byte, unsigned char bit, unsigned char value)
 {
-	value &= 0x01; //we only care about the LSbit. Just to make sure.
 	if (value==0){
-		return byte & value<<bit;
+		return byte & ~(1<<bit);
 	}else{
-		return byte | value<<bit;
+		return byte | (1<<bit);
 	}
 }
 
@@ -188,7 +187,7 @@ unsigned char get_add_sreg(unsigned char sreg,unsigned char Rd, unsigned char Rr
 {
 	unsigned char N,V;
 	
-	printf("R=0x%02x\n",R);
+	printf("R=0x%02x ",R);
 	
 	//H: set if there was a carry from bit 3
 	sreg = set_bit(sreg,HFLAG,get_carry_from_bit(Rd, Rr, R, 3));
@@ -215,7 +214,7 @@ unsigned char get_sub_sreg(unsigned char sreg,unsigned char Rd, unsigned char Rr
 {
 	unsigned char N,V;
 	
-	printf("R=0x%02x\n",R);
+	printf("R=0x%02x ",R);
 	
 	//H: set if there was a borrow from bit 3
 	sreg = set_bit(sreg,HFLAG,get_borrow_from_bit(Rd, Rr, R, 3));
@@ -280,7 +279,8 @@ void instr_LDS(struct avrmcu *avr, unsigned short int opcode, unsigned short int
 	avr->PC++;
 	avr->registers[ r ] = avr->sram[ addr ];
 	avr->cycles += 2;
-	printf("LDS R%d = (SRAM 0x%04x)\n", r, addr);
+	printf( "LDS R%d = (SRAM 0x%04x) value: 0x%02X (%d)\n"
+	      , r, addr, avr->sram[ addr ], avr->sram[ addr ] );
 }
 
 //RCALL:	1101 KKKK KKKK KKKK
@@ -311,9 +311,7 @@ void instr_RET(struct avrmcu *avr, unsigned short int opcode, unsigned short int
 
 	//get the High byte first
 	//printf("SP: 0x%x, ports[SP]: 0x%x\n",avr->ports[SP],avr->sram[avr->ports[SP]]);
-	new_pc = avr->sram[++avr->ports[SP]];
-	new_pc <<=8;
-	new_pc = avr->sram[++avr->ports[SP]];
+	new_pc = (avr->sram[++avr->ports[SP]] <<8) | avr->sram[++avr->ports[SP]];
 	
 	printf("RET to PC=0x%04X\n",new_pc);
 
@@ -329,9 +327,7 @@ void instr_RETI(struct avrmcu *avr, unsigned short int opcode, unsigned short in
 
 	//get the High byte first
 	//printf("SP: 0x%x, ports[SP]: 0x%x\n",avr->ports[SP],avr->sram[avr->ports[SP]]);
-	new_pc = avr->sram[++avr->ports[SP]];
-	new_pc <<=8;
-	new_pc = avr->sram[++avr->ports[SP]];
+	new_pc = (avr->sram[++avr->ports[SP]] <<8) | avr->sram[++avr->ports[SP]];
 	avr->ports[SREG] = set_bit(avr->ports[SREG],IFLAG,1);
 	
 	printf("RETI to PC=0x%04X\n",new_pc);
@@ -347,11 +343,12 @@ void instr_PUSH(struct avrmcu *avr, unsigned short int opcode, unsigned short in
 	unsigned short int Rd=opcode & (~instructions[PUSH].mask); 
 	Rd >>= 4;
 
-	printf("pushing R%d\n",Rd);
 	if( avr->ports[SP] > avr->ramend ) {
 		printf( "\nuninitialized Stackpointer %x!\n\n",avr->ports[SP] );
 		return;
 	}
+	printf( "pushing R%d SP=0x%04X value=0x%02X\n"
+	      , Rd, avr->ports[SP], avr->registers[Rd] );
 	avr->sram[avr->ports[SP]--] = avr->registers[Rd];
 	avr->PC++;
 	avr->cycles += 2;
@@ -361,7 +358,6 @@ void instr_POP(struct avrmcu *avr, unsigned short int opcode, unsigned short int
 {
 	unsigned short int Rd=opcode & (~instructions[POP].mask); 
 	Rd >>= 4;
-	printf("popping R%d\n",Rd);	
 	if( avr->ports[SP] > avr->ramend ) {
 		printf( "\nuninitialized Stackpointer %x!\n\n",avr->ports[SP] );
 		return;
@@ -369,7 +365,8 @@ void instr_POP(struct avrmcu *avr, unsigned short int opcode, unsigned short int
 	avr->registers[Rd] = avr->sram[++avr->ports[SP]];
 	avr->PC++;
 	avr->cycles += 2;
-	
+	printf( "popping R%d SP=0x%04X value=0x%02X\n"
+	      , Rd, avr->ports[SP], avr->registers[Rd] );		
 }
 
 //OUT:	1011 1AAr rrrr AAAA
@@ -378,7 +375,8 @@ void instr_OUT(struct avrmcu *avr, unsigned short int opcode, unsigned short int
 	unsigned short int r=get_reg1(opcode);
 	unsigned short int port=get_port(opcode);
 
-	printf("OUT Port(0x%x) <- R%d\n",port,r);
+	printf( "OUT Port(0x%x) <- R%d  value: 0x%02X (%d)\n"
+	      , port, r, avr->registers[r], avr->registers[r]);
 
 	avr->ports[port] = avr->registers[r];
 
@@ -393,7 +391,8 @@ void instr_IN(struct avrmcu *avr, unsigned short int opcode, unsigned short int 
 	unsigned short int d=get_reg1(opcode);
 	unsigned short int port=get_port(opcode);
 
-	printf("IN R%d <- Port(0x%x)=0x%02x\n",d,port,avr->ports[port]);
+	printf( "IN R%d <- Port(0x%x)  value: 0x%02X (%d)\n"
+	      , d, port, avr->ports[port], avr->ports[port] );
 	
 	avr->registers[d] = avr->ports[port];
 	
@@ -441,7 +440,7 @@ void instr_CP(struct avrmcu *avr, unsigned short int opcode, unsigned short int 
 
 	sreg = get_sub_sreg(sreg,Rd,Rr,R);
 	
-	printf("CP R%d (0x%04x) ==  R%d (0x%04x) Sreg = 0x%02x\n"
+	printf("CP R%d (0x%02x) ==  R%d (0x%02x) Sreg = 0x%02x\n"
 	      , d, avr->registers[d], r, avr->registers[r], sreg);
 
 	avr->ports[SREG] = sreg;
@@ -814,7 +813,7 @@ void instr_BRBC(struct avrmcu *avr, unsigned short int opcode, unsigned short in
 	
 	//printf("sreg=0x%02x, s=%d, k=%d\n",avr->ports[SREG],s,k);
 	if ((avr->ports[SREG] & 0x01<<s)==0){
-		printf("BRBC: Branch to PC=%d\n",avr->PC+k+1);
+		printf("BRBC: Branch to PC=0x%04X\n",avr->PC+k+1);
 		avr->PC = avr->PC + k + 1;
 		avr->cycles+=2;
 	}else{
@@ -833,7 +832,7 @@ void instr_BRBS(struct avrmcu *avr, unsigned short int opcode, unsigned short in
 	
 	//X printf("sreg=0x%02x, s=%d, k=%d\n",avr->ports[SREG],s,k);
 	if ((avr->ports[SREG] & (0x01<<s))!=0){
-		printf("BRBS SREG bit%d: Branch to PC=%d\n", s, avr->PC+k+1);
+		printf("BRBS SREG bit%d: Branch to PC=0x%04X\n", s, avr->PC+k+1);
 		avr->PC = avr->PC + k + 1;
 		avr->cycles+=2;
 	}else{
@@ -1215,7 +1214,8 @@ void instr_STS(struct avrmcu *avr, unsigned short int opcode, unsigned short int
 	avr->PC++;
 	avr->sram[ addr ] = avr->registers[ r ];
 	avr->cycles += 2;
-	printf("STS: SRAM 0x%04x = R%d\n", addr,r);
+	printf("STS: SRAM 0x%04x = R%d value: 0x%02X (%d)\n"
+		  , addr,r, avr->registers[ r ], avr->registers[ r ]);
 }
 
 //ST_X:	1001 001r rrrr 1100 
@@ -1448,7 +1448,7 @@ unsigned short int getInstructionSize( unsigned short int opcode ) {
 
 struct instruction* init_instructions_array(void){
 	static struct instruction instructions[INSTR_MAX];
-	
+		
 	//RJMP: 1100 kkkk kkkk kkkk
 	set_instr(instructions, RJMP, 0xF000, 0xC000, &instr_RJMP);
 
