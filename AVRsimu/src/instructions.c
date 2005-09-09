@@ -1204,6 +1204,24 @@ void instr_SBIS(struct avrmcu *avr, unsigned short int opcode, unsigned short in
 	}
 }
 
+//STD Store Indirect Data X or Y register with Displacement
+void instr_STD(struct avrmcu *avr, unsigned short int opcode, unsigned short int size) 
+{
+	unsigned char      d          = get_reg1( opcode );
+	unsigned short int offsetword =	get_offsetword( opcode );
+	unsigned short int r          = opcode & 0x0008 ? 28 : 30;
+	unsigned short int addr;
+
+	addr = (avr->registers[r+1]<<8) | avr->registers[r];
+	addr+=offsetword;
+	avr->sram[addr] = avr->registers[d];
+
+	printf( "STD %c+%d (SRAM 0x%04X), R%d (value: 0x%02X)\n"
+	      , opcode & 0x0008 ? 'Y' : 'Z', offsetword, addr, d, avr->sram[addr] );
+	avr->PC ++;
+	avr->cycles += 2;
+}
+
 //STS:	1001 001r rrrr 0000  aaaa aaaa aaaa aaaa
 void instr_STS(struct avrmcu *avr, unsigned short int opcode, unsigned short int size)
 {
@@ -1280,22 +1298,6 @@ void instr_ST_MX(struct avrmcu *avr, unsigned short int opcode, unsigned short i
 	printf("ST -X(SRAM 0x%04x), R%d: \n", addr,r);
 }
 
-//ST_Y:	1000 001r rrrr 1000
-void instr_ST_Y(struct avrmcu *avr, unsigned short int opcode, unsigned short int size)
-{
-	unsigned char	   r    = get_reg1(opcode);
-	unsigned short int addr = 0;
-	addr = (avr->registers[29]<<8) + avr->registers[28];
-	avr->PC++;
-	if( addr > avr->ramend ) {
-		printf("ERROR: *Y out of available SRAM!");
-		return;
-	}
-	avr->sram[ addr ] = avr->registers[ r ];
-	avr->cycles += 2;
-	printf("ST Y(SRAM 0x%04x), R%d: \n", addr,r);
-}
-
 //ST_YP:1001 001r rrrr 1001
 void instr_ST_YP(struct avrmcu *avr, unsigned short int opcode, unsigned short int size)
 {
@@ -1338,22 +1340,6 @@ void instr_ST_MY(struct avrmcu *avr, unsigned short int opcode, unsigned short i
 	avr->sram[ addr ] = avr->registers[ r ];
 	avr->cycles += 2;
 	printf("ST -Y(SRAM 0x%04x), R%d: \n", addr,r);
-}
-
-//ST_Z:	1000 001r rrrr 0000
-void instr_ST_Z(struct avrmcu *avr, unsigned short int opcode, unsigned short int size)
-{
-	unsigned char	   r    = get_reg1(opcode);
-	unsigned short int addr = 0;
-	addr = (avr->registers[31]<<8) + avr->registers[30];
-	avr->PC++;
-	if( addr > avr->ramend ) {
-		printf("ERROR: *Z out of available SRAM!\n");
-		return;
-	}
-	avr->sram[ addr ] = avr->registers[ r ];
-	avr->cycles += 2;
-	printf("ST Z(SRAM 0x%04x), R%d: \n", addr,r);
 }
 
 //ST_ZP:1001 001r rrrr 0001
@@ -1596,6 +1582,9 @@ struct instruction* init_instructions_array(void){
 	//SBIS:	1001 1011 AAAA Abbb
 	set_instr(instructions, SBIS, 0xFF00, 0x9B00, &instr_SBIS);
 
+	//STD:	
+	set_instr(instructions, STD, 0xD200, 0x8200, &instr_STD);
+
 	//STS:	1001 001r rrrr 0000  aaaa aaaa aaaa aaaa
 	set_instr2(instructions, STS, 0xFE0F, 0x9200, &instr_STS);
 
@@ -1608,17 +1597,11 @@ struct instruction* init_instructions_array(void){
 	//ST_MX:1001 001r rrrr 1110 
 	set_instr(instructions, ST_MX, 0xFE0F, 0x920E, &instr_ST_MX);
 
-	//ST_Y:	1000 001r rrrr 1000
-	set_instr(instructions, ST_Y, 0xFE0F, 0x8208, &instr_ST_Y);
-
 	//ST_YP:1001 001r rrrr 1001
 	set_instr(instructions, ST_YP, 0xFE0F, 0x9209, &instr_ST_YP);
 
 	//ST_MY:1001 001r rrrr 1010
 	set_instr(instructions, ST_MY, 0xFE0F, 0x920A, &instr_ST_MY);
-
-	//ST_Z:	1000 001r rrrr 0000
-	set_instr(instructions, ST_Z, 0xFE0F, 0x8200, &instr_ST_Z);
 
 	//ST_ZP:1001 001r rrrr 0001
 	set_instr(instructions, ST_ZP, 0xFE0F, 0x9201, &instr_ST_ZP);
