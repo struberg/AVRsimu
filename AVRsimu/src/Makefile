@@ -2,5 +2,5 @@
 avrsimu: avrsimu.o avr.o instructions.o
 
 clean:
-	rm *.o
-	rm avrsimu
+	rm -f *.o
+	rm -f avrsimu
