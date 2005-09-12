@@ -18,6 +18,9 @@
  *  Foundation, Inc., 59 Temple Street #330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef AVR_H
+#define AVR_H
+
 #define FLASHEND	511//1023
 #define SRAMSIZE	128
 #define RAMEND		SRAMSIZE+95	//96bytes for Registers and IO-ports
@@ -25,6 +28,8 @@
 /*IO-Ports */
 #define	SREG		0x3F
 #define SP		0x3D
+
+extern char* PORTS[64];
 
 
 #define CFLAG		0
@@ -74,3 +79,4 @@ struct avrmcu{
 
 extern struct avrmcu * avr;
 
+#endif

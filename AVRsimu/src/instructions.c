@@ -374,9 +374,10 @@ void instr_OUT(struct avrmcu *avr, unsigned short int opcode, unsigned short int
 {
 	unsigned short int r=get_reg1(opcode);
 	unsigned short int port=get_port(opcode);
-
-	printf( "OUT Port(0x%x) <- R%d  value: 0x%02X (%d)\n"
-	      , port, r, avr->registers[r], avr->registers[r]);
+	char* szport = PORTS[port] != 0 ? PORTS[port] : "";
+	
+	printf( "OUT Port %s (0x%x) <- R%d  value: 0x%02X (%d)\n"
+	      , szport, port, r, avr->registers[r], avr->registers[r]);
 
 	avr->ports[port] = avr->registers[r];
 
@@ -390,9 +391,10 @@ void instr_IN(struct avrmcu *avr, unsigned short int opcode, unsigned short int 
 {
 	unsigned short int d=get_reg1(opcode);
 	unsigned short int port=get_port(opcode);
+	char* szport = PORTS[port] != 0 ? PORTS[port] : "";
 
-	printf( "IN R%d <- Port(0x%x)  value: 0x%02X (%d)\n"
-	      , d, port, avr->ports[port], avr->ports[port] );
+	printf( "IN R%d <- Port %s (0x%x)  value: 0x%02X (%d)\n"
+	      , d, szport, port, avr->ports[port], avr->ports[port] );
 	
 	avr->registers[d] = avr->ports[port];
 	

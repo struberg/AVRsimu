@@ -22,6 +22,72 @@
 #include "avr.h"
 #include "instructions.h"
 
+char* PORTS[64] = 
+	{ 0		 		// 0
+	, 0 			// 1	
+	, 0 			// 2
+	, 0 			// 3
+	, "ADCL" 		// 4
+	, "ADCH" 		// 5
+	, "ADCSR" 		// 6
+	, "ADMUX" 		// 7
+	, "ACSR" 		// 8
+	, 0 			// 9
+	, 0 			// a
+	, 0 			// b
+	, 0 			// c
+	, "USICR" 		// d
+	, "USISR" 		// e
+	, "USIDR" 		// f
+	, 0 			// 10
+	, 0 			// 11
+	, 0 			// 12
+	, 0 			// 13
+	, 0 			// 14
+	, 0 			// 15
+	, "PINB" 		// 16
+	, "DDRB" 		// 17
+	, "PORTB" 		// 18
+	, "PINA" 		// 19
+	, "DDRA" 		// 1a
+	, "PORTA" 		// 1b
+	, "EECR" 		// 1c
+	, "EEDR" 		// 1d
+	, "EEAR" 		// 1e
+	, 0 			// 1f
+	, 0 			// 20
+	, "WDTCTR" 		// 21
+	, 0 			// 22
+	, 0 			// 23
+	, 0 			// 24
+	, 0 			// 25
+	, 0 			// 26
+	, 0 			// 27
+	, 0 			// 28
+	, "PLLCSR" 		// 29
+	, 0 			// 2a
+	, "OCR1C" 		// 2b
+	, "OCR1B" 		// 2c
+	, "OCR1A" 		// 2d
+	, "TCNT1" 		// 2e
+	, "TCCR1B" 		// 2f
+	, "TCCR1A" 		// 30
+	, "OSCCAL" 		// 31
+	, "TCNT0" 		// 32
+	, "TCCR0" 		// 33
+	, "MCUSR" 		// 34
+	, "MCUCR" 		// 35
+	, 0 			// 36
+	, 0 			// 37
+	, "TIFR" 		// 38
+	, "TIMSK" 		// 39
+	, "GIFR" 		// 3a
+	, "GIMSK" 		// 3b
+	, 0 			// 3c
+	, "SPL" 		// 3d
+	, "SPH" 		// 3e
+	, "SREG" };		// 3f
+
 /* execute the next instruction */
 void step(struct avrmcu * avr)
 {
