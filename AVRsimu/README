@@ -5,3 +5,16 @@ It has a command line interface, graphical interfaces may follow.
 AVRsimu tries to stay small and portable.
 
 For more Information, see http://sourceforge.net/projects/avrsimu/
+
+== Changelog ==
+
+This only summarizes changes between releases.
+See the ChangeLog file (created with cvs2cl -t) for more details.
+
+0.1.4 Some majof Bugfixes and Changes
+- Critical Bugs fixed
+- New Instructions
+- Output beautification
+- Preparations to support additional MCU variants
+
+0.1.3 First official Release
