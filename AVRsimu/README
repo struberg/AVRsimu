@@ -22,7 +22,7 @@ AVRsimu only requires make and a c compiler (e.g. gcc) do build.
 This only summarizes changes between releases.
 See the ChangeLog file (created with cvs2cl -t) for more details.
 
-0.1.4 Some majof Bugfixes and Changes
+0.1.4 Some major Bugfixes and Changes
 - Critical Bugs fixed
 - New Instructions
 - Output beautification
