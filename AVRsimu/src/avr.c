@@ -88,8 +88,11 @@ char* PORTS[64] =
 	, "SPH" 		// 3e
 	, "SREG" };		// 3f
 
-/* execute the next instruction */
-void step(struct avrmcu * avr)
+/**
+ * execute the next instruction 
+ * @return 1 if ok, 0 on error
+ */
+int step(struct avrmcu * avr)
 {
 	unsigned short int opcode;
 	int i;
@@ -109,17 +112,41 @@ void step(struct avrmcu * avr)
 	}
 	if (i==INSTR_MAX) { //we haven't found the instruction
 			printf("Instruction not yet implemented\n");
+			return 0;
 	}
+	
+	return 1;
 }
+
+
+/**
+ * trigger interrupt service routine 
+ */
+void isr( struct avrmcu * avr, int addr ) {
+	if( avr->ports[SP] > avr->ramend ) {
+		printf( "\nuninitialized Stackpointer %x!\n\n",avr->ports[SP] );
+		return;
+	}
+	//low byte first:
+	avr->sram[avr->ports[SP]--] =  (avr->PC+1) & 0x00FF;
+	//then the high byte:
+	avr->sram[avr->ports[SP]--] =  ((avr->PC+1) & 0xFF00)>>8;
+
+	avr->cycles += 4;
+	avr->PC = addr;
+}
+
 
 /**
  * Continue programm execution till next breakpoint
+ * @return 1 if ok, 0 on error
  */
-void cont( struct avrmcu* avr ) {
+int cont( struct avrmcu* avr ) {
 	unsigned long int cyclesStart = avr->cycles;
-	step( avr ); // the first step have to be done without breakpoint checking
-	while( avr->breakpoint[avr->PC] != 1 ) {
-		step( avr );
+	int iOk = 1;
+	iOk = step( avr ); // the first step have to be done without breakpoint checking
+	while( iOk && avr->breakpoint[avr->PC] != 1 ) {
+		iOk = step( avr );
 	}
 	printf( "stopped at breakpoint 0x%04x  after %d CPU-cycles\n", avr->PC, avr->cycles - cyclesStart ); 
 }

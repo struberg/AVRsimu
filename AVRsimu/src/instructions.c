@@ -1468,7 +1468,7 @@ struct instruction* init_instructions_array(void){
 	set_instr(instructions, IN, 0xF800, 0xB000, &instr_IN );
 
 	//MOV:	0010 11rd dddd rrrr
-	set_instr(instructions, MOV, 0xF800, 0x2C00, &instr_MOV);
+	set_instr(instructions, MOV, 0xFC00, 0x2C00, &instr_MOV);
 
 	//MOVW:	0000 0001 dddd rrrr
 	set_instr(instructions, MOVW, 0xFF00, 0x0100, &instr_MOVW);
@@ -1516,7 +1516,7 @@ struct instruction* init_instructions_array(void){
 	set_instr(instructions, CBI, 0xFF00, 0x9800, &instr_CBI);
 	
 	//SBI: 	1001 1010 AAAA Abbb
-	set_instr(instructions, SBI, 0xFF00, 0x9800, &instr_SBI);
+	set_instr(instructions, SBI, 0xFF00, 0x9A00, &instr_SBI);
 	
 	//COM:	1001 010d dddd 0000
 	set_instr(instructions, COM, 0xFE0F, 0x9400, &instr_COM);

@@ -55,10 +55,9 @@ struct avrmcu* create_avrmcu(void);
 int load_ihex(struct avrmcu *, const char *);
 void reset_avr(struct avrmcu *);
 void clear_flash(struct avrmcu *);
-
-
-void step(struct avrmcu* avr );
-void cont( struct avrmcu* avr );
+int  step(struct avrmcu* avr );
+int  cont( struct avrmcu* avr );
+void isr( struct avrmcu * avr, int addr );
 
 
 struct avrmcu{

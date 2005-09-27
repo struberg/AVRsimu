@@ -33,6 +33,7 @@ void print_flash(struct avrmcu * avr);
 void set_flash(struct avrmcu * avr);
 void print_breakpoints( struct avrmcu * avr);
 void set_breakpoint( struct avrmcu * avr);
+void set_isr( struct avrmcu * avr);
 int run(struct avrmcu * avr);
 
 
@@ -83,6 +84,9 @@ int main(int argc, const char* argv[])
 			case 'F':
 				set_flash(avr);
 				break;
+			case 'I':
+				set_isr(avr);
+				break;
 			case 'n':
 				step(avr);
 				break;
@@ -117,6 +121,7 @@ void printHelp() {
 	printf( "c   Continue execution till next breakpoint\n");
 	printf( "b   show Breakpoints\n");
 	printf( "B   toggle Breakpoint\n");
+	printf( "I   trigger Interrupt service routine\n");
 	printf( "x   eXit\n");
 }
 
@@ -243,3 +248,19 @@ void set_breakpoint( struct avrmcu * avr) {
 	}
 }
 
+/**
+ * trigger interrupt service routine
+ */
+void set_isr( struct avrmcu * avr) {
+	int addr = -1;
+	printf( "enter interrupt vector in hex: " );
+	scanf( "%X", &addr );
+	if( addr != -1 ) {
+		if( addr > 0x20 ) {
+			printf( "\nERROR! illegal interrupt vector!\n\n" );
+		} else {
+			printf( "triggering interrupt vector at address 0x%X\n", addr );
+			isr( avr, addr );
+		}
+	}
+}
