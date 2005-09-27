@@ -1388,6 +1388,13 @@ void instr_ST_MZ(struct avrmcu *avr, unsigned short int opcode, unsigned short i
 	printf("ST -Z(SRAM 0x%04x), R%d: \n", addr,r);
 }
 
+//WDR 
+void instr_WDR(struct avrmcu *avr, unsigned short int opcode, unsigned short int size)
+{
+	avr->PC++;
+	avr->cycles++;
+	printf("Resetting Watchdog\n");
+}
 
 /* this function initializes the instruction-array.
  * To do this, 3 steps are done for each instruction:
@@ -1611,6 +1618,8 @@ struct instruction* init_instructions_array(void){
 	//ST_MZ:1001 001r rrrr 0010
 	set_instr(instructions, ST_MZ, 0xFE0F, 0x9202, &instr_ST_MZ);
 
+	//WDR: 1001 0101 1010 1000
+	set_instr(instructions, ST_MZ, 0xFFFF, 0x95A8, &instr_WDR);
 	
 	return instructions;
 };

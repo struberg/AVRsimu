@@ -129,6 +129,7 @@ enum _instructions{
 	ST_MY,
 	ST_ZP,
 	ST_MZ,
+	WDR,
 	INSTR_MAX
 };
 		
