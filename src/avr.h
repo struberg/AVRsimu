@@ -58,12 +58,13 @@ void clear_flash(struct avrmcu *);
 int  step(struct avrmcu* avr );
 int  cont( struct avrmcu* avr );
 void isr( struct avrmcu * avr, int addr );
+void toggleBreakpoint( struct avrmcu* avr, unsigned short int line );
 
 
 struct avrmcu{
 	char name[10];
 	int PC;
-	long int cycles;
+	int cycles;
 	unsigned int ramend;
 	unsigned int flashend;
 	unsigned int lastinstruction;

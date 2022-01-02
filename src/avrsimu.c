@@ -44,6 +44,7 @@ int main(int argc, const char* argv[])
 	struct avrmcu * avr;
 	int    bCont = 1;
 	unsigned char   cCmd  = 0;
+	unsigned char   cPreviousCmd  = 0;
 	
 	avr = create_avrmcu();
 	instructions = init_instructions_array();	
@@ -59,9 +60,15 @@ int main(int argc, const char* argv[])
 	
 	reset_avr(avr);
 	//print_sram(&avr);
+
 	
 	while( bCont ) {
 		cCmd = getc( stdin );
+
+		if (cCmd == '\n') {
+			cCmd = cPreviousCmd;
+		}
+
 		switch( cCmd) {
 			case '?': 
 				printHelp();
@@ -103,10 +110,12 @@ int main(int argc, const char* argv[])
 				bCont=0;
 				break;
 		}
+
+		cPreviousCmd = cCmd;
+
 	}
-	
+
 	printf("\n");
-	
 }
 
 void printHelp() {
@@ -140,7 +149,7 @@ void print_sram(struct avrmcu * avr)
 }
 
 void set_sram(struct avrmcu * avr) {
-	long int addr = -1;
+	int addr = -1;
 	int value = -1;
 	printf( "Enter SRAM address to change in hex: " );
 	scanf( "%x", &addr );
@@ -201,8 +210,8 @@ void print_flash(struct avrmcu * avr)
 }
 
 void set_flash(struct avrmcu * avr) {
-	long int addr = -1;
-	long int value = -1;
+	int addr = -1;
+	int value = -1;
 	printf( "Enter Flash address to change in hex: " );
 	scanf( "%x", &addr );
 	if( addr == -1 || addr > avr->flashend ) {

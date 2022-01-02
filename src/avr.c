@@ -142,19 +142,20 @@ void isr( struct avrmcu * avr, int addr ) {
  * @return 1 if ok, 0 on error
  */
 int cont( struct avrmcu* avr ) {
-	unsigned long int cyclesStart = avr->cycles;
+	unsigned int cyclesStart = avr->cycles;
 	int iOk = 1;
 	iOk = step( avr ); // the first step have to be done without breakpoint checking
 	while( iOk && avr->breakpoint[avr->PC] != 1 ) {
 		iOk = step( avr );
 	}
 	printf( "stopped at breakpoint 0x%04x  after %d CPU-cycles\n", avr->PC, avr->cycles - cyclesStart ); 
+	return iOk;
 }
 
 /**
  * Toggle breakpoint for the given line
  */
-toggleBreakpoint( struct avrmcu* avr, unsigned short int line ) {
+void toggleBreakpoint( struct avrmcu* avr, unsigned short int line ) {
 	avr->breakpoint[line] = avr->breakpoint[line] == 0 ? 1 : 0;
 }
 

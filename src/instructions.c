@@ -95,7 +95,7 @@ unsigned char get_io_reg (unsigned short int opcode)
 //get 0000 0000 0000 0bbb
 unsigned char get_sbit (unsigned short int opcode)
 {
-	return (opcode & 0x0007)>>3;
+	return (opcode & 0x0007);
 }
 
 
